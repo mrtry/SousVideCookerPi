@@ -1,2 +1,3 @@
 # SousVideCooker
-RaspberryPiで作った低温調理機アプリ
+
+Raspberry Piで作る低温調理機
