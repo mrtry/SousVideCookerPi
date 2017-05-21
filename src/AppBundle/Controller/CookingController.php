@@ -117,11 +117,37 @@ class CookingController extends Controller
     /**
      * @Route("/changeTemperature")
      */
-    public function changeTemperatureAction()
+    public function changeTemperatureAction(Request $request)
     {
-        return $this->render('AppBundle:Cooking:change_temperature.html.twig', array(
-            // ...
-        ));
+        $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
+
+        if (!$cookingJob) {
+            return new JsonResponse(
+                [
+                    'message' => 'Nothing CookingJob.',
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingTemperature = (int)$request->request->get('cookingTemperature');
+
+        if (!$cookingTemperature) {
+            return new JsonResponse(
+                [
+                    'error' =>  [
+                        'message'   =>  'Wrong number of arguments',
+                    ]
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingJob->setCookingTemperature($cookingTemperature);
+        $manager = $this->getDoctrine()->getManager();
+        $manager->flush();
+
+        return new JsonResponse($this->getCookingStatus($cookingJob));
     }
 
     /*
@@ -156,9 +182,11 @@ class CookingController extends Controller
         return [
             'isCooking'             => $cookingJob->getIsCooking(),
             'CookingTime'           => $this->convertMinuteToTime($cookingJob->getCookingTime()),
+            'CookingTemperature'    => $cookingJob->getCookingTemperature(),
             'CurrentTemperature'    => $this->container->get('app.gpio')->getCurrentTemperature(),
             'CookingStartTime'      => $cookingJob->getCookingStartTime()->format('Y-m-d H:i:s'),
             'CookingEndTime'        => $cookingJob->getCookingEndTime()->format('Y-m-d H:i:s'),
+            'description'           => $cookingJob->getDescription(),
         ];
     }
 }
