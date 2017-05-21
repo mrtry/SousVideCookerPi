@@ -78,7 +78,22 @@ class CookingController extends Controller
      */
     public function stopAction()
     {
-        return new JsonResponse();
+        $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
+
+        if (!$cookingJob) {
+            return new JsonResponse(
+                [
+                    'message' => 'Nothing CookingJob.',
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingJob->setIsCooking(false);
+        $manager = $this->getDoctrine()->getManager();
+        $manager->flush();
+
+        return new JsonResponse($this->getCookingStatus($cookingJob));
     }
 
     /**
@@ -91,7 +106,7 @@ class CookingController extends Controller
         if (!$cookingJob) {
             return new JsonResponse(
                 [
-                    'message'   => 'The cooking does not begin yet.',
+                    'message' => 'The cooking does not begin yet.',
                 ]
             );
         }
