@@ -115,9 +115,9 @@ class CookingController extends Controller
     }
 
     /**
-     * @Route("/changeTemperature")
+     * @Route("/updateCookingTemperature")
      */
-    public function changeTemperatureAction(Request $request)
+    public function updateCookingTemperatureAction(Request $request)
     {
         $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
 
@@ -144,6 +144,83 @@ class CookingController extends Controller
         }
 
         $cookingJob->setCookingTemperature($cookingTemperature);
+        $manager = $this->getDoctrine()->getManager();
+        $manager->flush();
+
+        return new JsonResponse($this->getCookingStatus($cookingJob));
+    }
+
+    /**
+     * @Route("/updateCookingTime")
+     */
+    public function updateCookingTimeAction(Request $request)
+    {
+        $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
+
+        if (!$cookingJob) {
+            return new JsonResponse(
+                [
+                    'message' => 'Nothing CookingJob.',
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingTime = $request->request->get('cookingTime');
+
+        if (!$cookingTime) {
+            return new JsonResponse(
+                [
+                    'error' =>  [
+                        'message'   =>  'Wrong number of arguments',
+                    ]
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingTime = $this->convertTimeToMinute($cookingTime);
+        $cookingStartTime = clone $cookingJob->getCookingStartTime();
+        $cookingEndTime = $cookingStartTime->modify(sprintf('+%d min', $cookingTime));
+
+        $cookingJob->setCookingTime($cookingTime);
+        $cookingJob->setCookingEndTime($cookingEndTime);
+        $manager = $this->getDoctrine()->getManager();
+        $manager->flush();
+
+        return new JsonResponse($this->getCookingStatus($cookingJob));
+    }
+
+    /**
+     *  @Route("/updateDescription")
+     */
+    public function updateDescriptionAction(Request $request)
+    {
+        $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
+
+        if (!$cookingJob) {
+            return new JsonResponse(
+                [
+                    'message' => 'Nothing CookingJob.',
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingTime = $request->request->get('description');
+
+        if (!$cookingTemperature) {
+            return new JsonResponse(
+                [
+                    'error' =>  [
+                        'message'   =>  'Wrong number of arguments',
+                    ]
+                ],
+                JsonResponse::HTTP_BAD_REQUEST
+            );
+        }
+
+        $cookingJob->setDescription($description);
         $manager = $this->getDoctrine()->getManager();
         $manager->flush();
 
