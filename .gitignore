@@ -49,3 +49,6 @@
 
 # PHP version setting file
 .php-version
+
+## remove .swp file
+*.swp

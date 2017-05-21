@@ -86,9 +86,17 @@ class CookingController extends Controller
      */
     public function statusAction()
     {
-        return $this->render('AppBundle:Cooking:status.html.twig', array(
-            // ...
-        ));
+        $cookingJob = $this->getDoctrine()->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
+
+        if (!$cookingJob) {
+            return new JsonResponse(
+                [
+                    'message'   => 'The cooking does not begin yet.',
+                ]
+            );
+        }
+
+        return new JsonResponse($this->getCookingStatus($cookingJob));
     }
 
     /**
