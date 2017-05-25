@@ -25,10 +25,7 @@ class AppCookingCommand extends ContainerAwareCommand
         $cookingJob = $this->getContainer()->get('doctrine')->getRepository('AppBundle:CookingJob')->findOneByIsCooking(true);
         $gpioService = $this->getContainer()->get('app.gpio');
 
-        for ($i=0; $i<10; $i++) {
-            exec('touch /Users/symmt/Program/Study/SousVideCookerPi/$(date "+%Y%m%d-%H%M%S").txt');
-            sleep(3);
-        }
+        $output->writeln('ok');
     }
 
 }

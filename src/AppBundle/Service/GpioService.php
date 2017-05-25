@@ -8,10 +8,16 @@ use PiPHP\GPIO\Pin\PinInterface;
 class GpioService
 {
     private $gpio;
+    private $adjustTemperature;
+    private $thermometerDeviceId;
+    private $relayPinNumber;
 
-    public function __construct()
+    public function __construct(GPIO $gpio, $adjustTemperature, $thermometerDeviceId, $relayPinNumber)
     {
-        $this->gpio = new Gpio();
+        $this->gpio = $gpio;
+        $this->adjustTemperature    = $adjustTemperature;
+        $this->thermometerDeviceId  = $thermometerDeviceId;
+        $this->relayPinNumber       = $relayPinNumber;
     }
 
     /**
@@ -21,13 +27,12 @@ class GpioService
      */
     public function getCurrentTemperature()
     {
-        //$command = sprintf(
-        //    'cat /sys/bus/w1/devices/%s/w1_slave | perl -e \'while(<stdin>){ if(/t=([-0-9]+)/){print $1/1000+%f,"\n";} }\'',
-        //    '28-0516a43dafff',
-        //    7.5
-        //);
-        //return exec($command);
-        return 20.0;
+        $command = sprintf(
+            'cat /sys/bus/w1/devices/%s/w1_slave | perl -e \'while(<stdin>){ if(/t=([-0-9]+)/){print $1/1000+%f,"\n";} }\'',
+            $this->thermometerDeviceId,
+            $this->adjustTemperature
+        );
+        return exec($command);
     }
 
     /**
@@ -35,11 +40,11 @@ class GpioService
      *
      * @param boolean
      */
-    public function setPower($bool)
+    public function setPower($state)
     {
-        $pin = $this->gpio->getOutputPin(26);
-        $pin->setValue(PinInterface::VALUE_HIGH);
+        $value = $state ? PinInterface::VALUE_HIGH : PinInterface::VALUE_LOW;
 
-        return;
+        $pin = $this->gpio->getOutputPin($this->relayPinNumber);
+        $pin->setValue($value);
     }
 }

@@ -68,7 +68,7 @@ class CookingController extends Controller
             $this->container->getParameter('kernel.root_dir'),
             'app:cooking > /dev/null 2>&1 &'
         );
-        //exec(escapeshellcmd($command));
+        shell_exec($command);
 
         return new JsonResponse($this->getCookingStatus($cookingJob));
     }
