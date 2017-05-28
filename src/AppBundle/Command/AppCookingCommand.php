@@ -40,8 +40,8 @@ class AppCookingCommand extends ContainerAwareCommand
         do {
             $temperature = $gpioService->getCurrentTemperature();
 
-            $pg = proportionalController($temperature, $cookingJob->getCookingTemperature(), self::Kp);
-            $ig = integralController($previous, $temperature, $cookingJob->getCookingTemperature(), self::Ki);
+            $pg = $this->proportionalController($temperature, $cookingJob->getCookingTemperature(), self::Kp);
+            $ig = $this->integralController($previous, $temperature, $cookingJob->getCookingTemperature(), self::Ki);
             $power = $pg + $ig;
 
             if ($power > 0) {
@@ -55,17 +55,19 @@ class AppCookingCommand extends ContainerAwareCommand
                 sprintf('%s, %f, %f, %f', $date->format('H:i:s'), $temperature, self::Kp, self::Ki)
             );
 
-            $this->output($power);
+            $this->out($power);
 
             $cookingJob = $cookingJobRepository->findOneById($cookingJobId);
         } while (
-            !$cookingJob
+            $cookingJob->getIsCooking()
             || $cookingJob->getCookingEndTime() < new \DateTime('now')
         );
     }
 
-    protected function output($power)
+    protected function out($power)
     {
+        $gpioService = $this->getContainer()->get('app.gpio');
+
         if ($power > 1) {
             $power = 1;
         }
@@ -75,12 +77,12 @@ class AppCookingCommand extends ContainerAwareCommand
 
         if ($on > 0) {
             $gpioService->setPower(true);
-            $sleep($on);
+            sleep($on);
         }
 
         if ($off > 0) {
             $gpioService->setPower(false);
-            $sleep($off);
+            sleep($off);
         }
     }
 
@@ -102,7 +104,7 @@ class AppCookingCommand extends ContainerAwareCommand
         }
 
         $d1 = $target - $now;
-        $d2 = $target - $prew;
+        $d2 = $target - $previous;
 
         if ($d1 < 0) {
             return 0;
