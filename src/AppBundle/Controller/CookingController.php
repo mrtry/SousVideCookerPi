@@ -32,7 +32,7 @@ class CookingController extends Controller
             );
         }
 
-        $cookingTemperature = (int)$request->request->get('cookingTemperature');
+        $cookingTemperature = (double)$request->request->get('cookingTemperature');
         $cookingTime = $request->request->get('cookingTime');
         $description = $request->request->get('description');
 
@@ -122,7 +122,7 @@ class CookingController extends Controller
             );
         }
 
-        $cookingTemperature = (int)$request->request->get('cookingTemperature');
+        $cookingTemperature = (double)$request->request->get('cookingTemperature');
         $cookingTime = $request->request->get('cookingTime');
         $description = $request->request->get('description');
 

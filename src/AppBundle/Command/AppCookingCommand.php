@@ -52,7 +52,7 @@ class AppCookingCommand extends ContainerAwareCommand
 
             $date = new \DateTime('now');
             $output->writeln(
-                sprintf('%s, %f, %f, %f', $date->format('H:i:s'), $temperature, self::Kp, self::Ki)
+                sprintf('%s, %f, %f, %f, %s, %s', $date->format('H:i:s'), $temperature, self::Kp, self::Ki, $cookingJob->getCookingTemperature(), $cookingJob->getCookingTime())
             );
 
             $this->out($power);
