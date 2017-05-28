@@ -3,7 +3,7 @@
 parameters:
     adjust_temperature: 7.5
     thermometer_device_id: '28-0516a43dafff'
-    relay_pin_id: 26
+    relay_bcm_id: 7
 
 services:
     gpio:
@@ -16,4 +16,4 @@ services:
             - '@gpio'
             - %adjust_temperature%
             - %thermometer_device_id%
-            - %relay_pin_id%
+            - %relay_bcm_id%

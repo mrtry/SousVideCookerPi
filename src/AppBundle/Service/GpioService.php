@@ -10,14 +10,14 @@ class GpioService
     private $gpio;
     private $adjustTemperature;
     private $thermometerDeviceId;
-    private $relayPinNumber;
+    private $relayBcmId;
 
-    public function __construct(GPIO $gpio, $adjustTemperature, $thermometerDeviceId, $relayPinNumber)
+    public function __construct(GPIO $gpio, $adjustTemperature, $thermometerDeviceId, $relayBcmId)
     {
         $this->gpio = $gpio;
         $this->adjustTemperature    = $adjustTemperature;
         $this->thermometerDeviceId  = $thermometerDeviceId;
-        $this->relayPinNumber       = $relayPinNumber;
+        $this->relayBcmId           = $relayBcmId;
     }
 
     /**
@@ -44,7 +44,7 @@ class GpioService
     {
         $value = $state ? PinInterface::VALUE_HIGH : PinInterface::VALUE_LOW;
 
-        $pin = $this->gpio->getOutputPin($this->relayPinNumber);
+        $pin = $this->gpio->getOutputPin($this->relayBcmId);
         $pin->setValue($value);
     }
 }
