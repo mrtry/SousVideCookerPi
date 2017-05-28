@@ -62,14 +62,6 @@ class CookingController extends Controller
         $manager->persist($cookingJob);
         $manager->flush();
 
-        // TODO:cookingコマンドをたたいて、バックグラウンドで処理させる
-        $command = sprintf(
-            'nohup %s/../bin/console %s',
-            $this->container->getParameter('kernel.root_dir'),
-            'app:cooking > /dev/null 2>&1 &'
-        );
-        shell_exec($command);
-
         return new JsonResponse($this->getCookingStatus($cookingJob));
     }
 
@@ -115,7 +107,7 @@ class CookingController extends Controller
     }
 
     /**
-     * @Route("/updateCookingTemperature")
+     * @Route("/update")
      */
     public function updateAction(Request $request)
     {
@@ -145,15 +137,21 @@ class CookingController extends Controller
             );
         }
 
-        $cookingJob->setCookingTemperature($cookingTemperature);
+        if ($cookingTemperature) {
+            $cookingJob->setCookingTemperature($cookingTemperature);
+        }
 
-        $cookingTime = $this->convertTimeToMinute($cookingTime);
-        $cookingStartTime = clone $cookingJob->getCookingStartTime();
-        $cookingEndTime = $cookingStartTime->modify(sprintf('+%d min', $cookingTime));
-        $cookingJob->setCookingTime($cookingTime);
-        $cookingJob->setCookingEndTime($cookingEndTime);
+        if ($cookingTime) {
+            $cookingTime = $this->convertTimeToMinute($cookingTime);
+            $cookingStartTime = clone $cookingJob->getCookingStartTime();
+            $cookingEndTime = $cookingStartTime->modify(sprintf('+%d min', $cookingTime));
+            $cookingJob->setCookingTime($cookingTime);
+            $cookingJob->setCookingEndTime($cookingEndTime);
+        }
 
-        $cookingJob->setDescription($description);
+        if ($description) {
+            $cookingJob->setDescription($description);
+        }
 
         $manager = $this->getDoctrine()->getManager();
         $manager->flush();

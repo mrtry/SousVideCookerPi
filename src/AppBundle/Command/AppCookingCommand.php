@@ -10,8 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AppCookingCommand extends ContainerAwareCommand
 {
-    const Ki = 1.0;
-    const Kp = 1.0;
+    const Kp = 2.0;
+    const Ki = 4.0;
 
     protected function configure()
     {
@@ -70,6 +70,7 @@ class AppCookingCommand extends ContainerAwareCommand
             $cookingJob->getIsCooking()
         );
 
+        $gpioService->setPower(false);
         $output->writeln('finished');
     }
 
