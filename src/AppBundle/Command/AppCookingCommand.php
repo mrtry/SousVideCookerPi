@@ -58,10 +58,19 @@ class AppCookingCommand extends ContainerAwareCommand
             $this->out($power);
 
             $cookingJob = $cookingJobRepository->findOneById($cookingJobId);
+
+            if ($cookingJob->getCookingEndTime() < new \DateTime('now')) {
+                $cookingJob->setIsCooking(false);
+
+                $manager = $this->getContainer()->get('doctrine')->getManager();
+                $manager->flush();
+            }
+
         } while (
             $cookingJob->getIsCooking()
-            || $cookingJob->getCookingEndTime() < new \DateTime('now')
         );
+
+        $output->writeln('finished');
     }
 
     protected function out($power)
