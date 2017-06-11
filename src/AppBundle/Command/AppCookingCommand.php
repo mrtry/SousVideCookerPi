@@ -25,19 +25,26 @@ class AppCookingCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $cookingJobRepository = $this->getContainer()->get('doctrine')->getRepository('AppBundle:CookingJob');
-        $cookingJob = $cookingJobRepository->findOneByIsCooking(true);
         $gpioService = $this->getContainer()->get('app.gpio');
+
+        $manager = $this->getContainer()->get('doctrine')->getManager();
+        $cookingJob = $this
+                ->getContainer()
+                ->get('doctrine')
+                ->getRepository('AppBundle:CookingJob')
+                ->findOneByIsCooking(true)
+            ;
+
 
         if (!$cookingJob) {
             return $output->writeln('Nothing CookingJob');
         }
 
-        $cookingJobId = $cookingJob->getId();
-
         $previous = 0;
 
         do {
+            $manager->refresh($cookingJob);
+
             $temperature = $gpioService->getCurrentTemperature();
 
             $pg = $this->proportionalController($temperature, $cookingJob->getCookingTemperature(), self::Kp);
@@ -57,18 +64,12 @@ class AppCookingCommand extends ContainerAwareCommand
 
             $this->out($power);
 
-            $cookingJob = $cookingJobRepository->findOneById($cookingJobId);
-
-            if ($cookingJob->getCookingEndTime() < new \DateTime('now')) {
-                $cookingJob->setIsCooking(false);
-
-                $manager = $this->getContainer()->get('doctrine')->getManager();
-                $manager->flush();
-            }
-
         } while (
-            $cookingJob->getIsCooking()
+            $cookingJob->getIsCooking() || $cookingJob->getCookingEndTime() < new \DateTime('now')
         );
+
+        $cookingJob->setIsCooking(false);
+        $manager->flush();
 
         $gpioService->setPower(false);
         $output->writeln('finished');

@@ -1,7 +1,7 @@
 # Learn more about services, parameters and containers at
 # http://symfony.com/doc/current/service_container.html
 parameters:
-    adjust_temperature: 7.3
+    adjust_temperature: 6.5
     thermometer_device_id: '28-0516a43dafff'
     relay_bcm_id: 7
 
