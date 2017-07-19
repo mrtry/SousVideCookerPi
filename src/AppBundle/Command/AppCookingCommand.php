@@ -35,7 +35,6 @@ class AppCookingCommand extends ContainerAwareCommand
                 ->findOneByIsCooking(true)
             ;
 
-
         if (!$cookingJob) {
             return $output->writeln('Nothing CookingJob');
         }
@@ -44,6 +43,10 @@ class AppCookingCommand extends ContainerAwareCommand
 
         do {
             $manager->refresh($cookingJob);
+
+            if ($cookingJob->getCookingEndTime() < new \DateTime('now')) {
+                $cookingJob->setIsCooking(false);
+            }
 
             $temperature = $gpioService->getCurrentTemperature();
 
@@ -57,15 +60,14 @@ class AppCookingCommand extends ContainerAwareCommand
 
             $previous = $temperature;
 
-            $date = new \DateTime('now');
             $output->writeln(
-                sprintf('%s, %f, %f, %f, %s, %s', $date->format('H:i:s'), $temperature, self::Kp, self::Ki, $cookingJob->getCookingTemperature(), $cookingJob->getCookingTime())
+                sprintf('%s, %f, %f, %f, %s, %s', (new \DateTime('now'))->format('H:i:s'), $temperature, self::Kp, self::Ki, $cookingJob->getCookingTemperature(), $cookingJob->getCookingTime())
             );
 
             $this->out($power);
 
         } while (
-            $cookingJob->getIsCooking() || $cookingJob->getCookingEndTime() < new \DateTime('now')
+            $cookingJob->getIsCooking()
         );
 
         $cookingJob->setIsCooking(false);
